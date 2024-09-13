@@ -1,0 +1,32 @@
+<LoginScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        padding: 50
+        spacing: 20
+
+        MDLabel:
+            text: "Inicio de Sesión"
+            halign: "center"
+            font_style: "H4"
+
+        MDTextField:
+            id: username
+            hint_text: "Nombre de Usuario"
+            mode: "rectangle"
+
+        MDTextField:
+            id: password
+            hint_text: "Contraseña"
+            password: True
+            mode: "rectangle"
+
+        MDRaisedButton:
+            text: "Iniciar Sesión"
+            pos_hint: {"center_x": 0.5}
+            on_release: root.login()
+
+        MDLabel:
+            id: message
+            text: ""
+            halign: "center"
+            theme_text_color: "Error"
