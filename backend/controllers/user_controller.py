@@ -1,35 +1,40 @@
 from controllers.account_controller import Cuenta 
 
 class Usuario:
-    usuarios_registrados = []  # Lista para almacenar todos los usuarios
+    usuarios_registrados = []
 
     def __init__(self, nombre, email, password, saldo_actual=0, historial_transacciones=None):
         self.nombre = nombre
         self.email = email
-        self.password = password
-        self.saldo_actual = saldo_actual
-        self.historial_transacciones = historial_transacciones if historial_transacciones is not None else []
-        self.cuentas = []  # Lista para almacenar las instancias de cuentas del usuario
+        self.__password = password 
+        self.__saldo_actual = saldo_actual 
+        self.__historial_transacciones = historial_transacciones if historial_transacciones is not None else [] 
+        self.__cuentas = [] 
 
-    def registrar_usuario(self):
-        # Agrega el usuario actual a la lista de usuarios registrados
-        Usuario.usuarios_registrados.append(self)
-        print(f"Usuario {self.nombre} registrado exitosamente.")
+    def get_password(self):
+        return self.__password
 
-    @classmethod
-    def iniciar_sesion(cls, email, password):
-        # Busca el usuario por email y verifica la contraseña
-        for usuario in cls.usuarios_registrados:
-            if usuario.email == email and usuario.password == password:
-                print(f"Inicio de sesión exitoso. Bienvenido {usuario.nombre}.")
-                return usuario  # Retorna el objeto Usuario si las credenciales son correctas
-        print("Email o contraseña incorrectos.")
-        return None
+    def set_password(self, new_password):
+        self.__password = new_password
+
+    def get_saldo_actual(self):
+        return self.__saldo_actual
+
+    def set_saldo_actual(self, new_saldo):
+        self.__saldo_actual = new_saldo
+
+    def get_historial_transacciones(self):
+        return self.__historial_transacciones
+
+    def set_historial_transacciones(self, nuevo_historial):
+        self.__historial_transacciones = nuevo_historial
+
+    def get_cuentas(self):
+        return self.__cuentas
 
     def agregar_cuenta(self, id_cuenta, tipo_cuenta, nombre_cuenta, saldo_inicial=0):
-        # Crea una instancia de Cuenta y la agrega a la lista de cuentas del usuario
         nueva_cuenta = Cuenta(id_cuenta, tipo_cuenta, nombre_cuenta, saldo_inicial)
-        self.cuentas.append(nueva_cuenta)
+        self.__cuentas.append(nueva_cuenta)
         print(f"Cuenta {nombre_cuenta} de tipo {tipo_cuenta} agregada exitosamente.")
 
     def eliminar_cuenta(self, nombre_cuenta):
