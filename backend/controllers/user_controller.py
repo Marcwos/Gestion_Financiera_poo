@@ -38,18 +38,18 @@ class Usuario:
         print(f"Cuenta {nombre_cuenta} de tipo {tipo_cuenta} agregada exitosamente.")
 
     def eliminar_cuenta(self, nombre_cuenta):
-        # Elimina una cuenta basada en el nombre de la cuenta
-        for cuenta in self.cuentas:
-            if cuenta.nombre_cuenta == nombre_cuenta:
-                self.cuentas.remove(cuenta)
+        for cuenta in self.get_cuentas():  # Cambiado de self.cuentas a self.get_cuentas()
+            if cuenta.get_nombre_cuenta() == nombre_cuenta:  # Cambiado a get_nombre_cuenta()
+                self.__cuentas.remove(cuenta)
                 print(f"Cuenta {nombre_cuenta} eliminada exitosamente.")
                 return
         print(f"No se encontró la cuenta {nombre_cuenta}.")
 
     def mostrar_cuentas(self):
-        if not self.cuentas:
+        if not self.get_cuentas():  # Cambiado de self.cuentas a self.get_cuentas()
             print(f"El usuario {self.nombre} no tiene cuentas.")
         else:
             print(f"Cuentas del usuario {self.nombre}:")
-            for cuenta in self.cuentas:
-                print(f"- {cuenta.nombre_cuenta} (Tipo: {cuenta.tipo_cuenta}, Saldo: {cuenta.saldo})")
+            for cuenta in self.get_cuentas():  # Cambiado de self.cuentas a self.get_cuentas()
+                print(f"- {cuenta.get_nombre_cuenta()} (Tipo: {cuenta.get_tipo_cuenta()}, Saldo: {cuenta.get_saldo()})")
+
