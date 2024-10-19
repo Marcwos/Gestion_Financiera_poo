@@ -1,12 +1,7 @@
-from controllers.transaction_controller import Transaccion
-
 class Informe:
-    def __init__(self, periodo_tiempo, tipo_informe):
+    def __init__(self, tipo_informe):
         if tipo_informe not in ["ingreso", "gastos", "neto"]:
             raise ValueError(f"Tipo de informe '{tipo_informe}' no es válido.")
-        
-        self.periodo_tiempo = periodo_tiempo  # Periodo de tiempo podría utilizarse en una validación futura.
-        self.tipo_informe = tipo_informe 
 
     def generar_informe(self, transacciones, fecha_inicio, fecha_fin):
         # Filtrar transacciones dentro del rango de fechas
@@ -19,7 +14,7 @@ class Informe:
             informe = self._generar_informe_gastos(transacciones_filtradas)
         elif self.tipo_informe == "neto":
             informe = self._generar_informe_neto(transacciones_filtradas)
-        
+    
         return informe
 
     # Métodos privados para generar cada tipo de informe
@@ -34,7 +29,10 @@ class Informe:
         return f"Total de gastos: {total}"
 
     def _generar_informe_neto(self, transacciones):
-        ingresos = sum(t['monto'] for t in transacciones if t['tipo'] == 'ingreso'])
-        gastos = sum(t['monto'] for t in transacciones if t['tipo'] == 'gasto'])
+        ingresos = sum(t['monto'] for t in transacciones if t['tipo'] == 'ingreso')
+        gastos = sum(t['monto'] for t in transacciones if t['tipo'] == 'gasto')
+
+        ingresos = sum(t['monto'] for t in transacciones if t['tipo'] == 'ingreso')
+        gastos = sum(t['monto'] for t in transacciones if t['tipo'] == 'gasto')
         neto = ingresos - gastos
         return f"Total neto: {neto}"

@@ -50,10 +50,10 @@ class Cuenta:
         """Agrega una transacción a la cuenta"""
         self.__transacciones.append(transaccion)
         if transaccion.tipo_transaccion == "Ingreso":
-            self.__saldo += transaccion.monto
+            self.__saldo += transaccion.get_monto()  # Aumenta el saldo
         elif transaccion.tipo_transaccion == "Gasto":
-            self.__saldo -= transaccion.monto
-        print(f"Transacción '{transaccion.descripcion}' añadida a la cuenta {self.__nombre_cuenta}.")
+            self.__saldo -= transaccion.get_monto()  # Disminuye el saldo
+        print(f"Transacción '{transaccion.get_descripcion()}' añadida a la cuenta {self.__nombre_cuenta}.")
 
     def mostrar_transacciones(self):
         """Muestra todas las transacciones de la cuenta"""

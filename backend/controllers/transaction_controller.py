@@ -79,10 +79,10 @@ class Transaccion:
 class TransaccionIngreso(Transaccion):
     def __init__(self, monto, categoria, fecha, descripcion):
         super().__init__(monto, categoria, fecha, descripcion)
-        # Aquí podrías agregar comportamiento o atributos adicionales para ingresos
+        self.tipo_transaccion = "Ingreso"  # Definimos el tipo de transacción
 
 
 class TransaccionGasto(Transaccion):
     def __init__(self, monto, categoria, fecha, descripcion):
         super().__init__(monto, categoria, fecha, descripcion)
-        # Aquí podrías agregar comportamiento o atributos adicionales para gastos
+        self.tipo_transaccion = "Gasto"  # Definimos el tipo de transacción
