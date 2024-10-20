@@ -3,11 +3,12 @@ from controllers.transaction_controller import Transaccion
 from controllers.account_controller import Cuenta
 from controllers.transaction_controller import TransaccionIngreso, TransaccionGasto
 from controllers.category_controller import Categoria  
+from controllers.inform_controller import Informe
+from controllers.goals_finance_controller import MetaFinanciera
+from datetime import date
 
 lista_categorias = []
-
-
-
+lista_transacciones = []
 
 print("-----Bienvenido a la aplicación Money Wise-----")
 
@@ -30,7 +31,6 @@ def mostrar_menu_categorias():
     print("3. Modificar categoría")
     print("4. Mostrar categorías")
     print("5. Salir")
-
 
 def registrar_usuario():
     nombre = input("Ingrese su nombre: ")
@@ -84,8 +84,7 @@ def menu_cuenta(usuario):
         else:
             print("Opción inválida. Intente nuevamente.")
 
-
-def ingresar_gastos(usuario):
+def ingresar_gastos(usuario, lista_transacciones):
     descripcion = input("Ingrese la descripción del gasto: ")
     monto = float(input("Ingrese el monto del gasto: "))
     
@@ -109,12 +108,15 @@ def ingresar_gastos(usuario):
         # Crear transacción de gasto
         transaccion = TransaccionGasto(monto, categoria.nombre_categoria, fecha, descripcion)
         cuenta_encontrada.agregar_transaccion(transaccion)
+
+        # Agregar la transacción a la lista de transacciones del usuario
+        usuario.lista_transacciones.append(transaccion)
+
         print("Gasto registrado exitosamente.")
     else:
         print("La cuenta no existe.")
 
-
-def ingresar_ingresos(usuario):
+def ingresar_ingresos(usuario, lista_transacciones):
     descripcion = input("Ingrese la descripción del ingreso: ")
     monto = float(input("Ingrese el monto del ingreso: "))
     
@@ -138,10 +140,14 @@ def ingresar_ingresos(usuario):
         # Crear la transacción de ingreso
         transaccion = TransaccionIngreso(monto, categoria.nombre_categoria, fecha, descripcion)
         cuenta_encontrada.agregar_transaccion(transaccion)
+
+        # Agregar la transacción a la lista de transacciones del usuario
+        usuario.lista_transacciones.append(transaccion)
+
         print("Ingreso registrado exitosamente.")
     else:
         print("La cuenta no existe.")
-        
+
 def mostrar_categorias(usuario):
     print("Categorías disponibles:")
     for idx, categoria in enumerate(usuario.lista_categorias):
@@ -169,8 +175,10 @@ def menu_categoria(usuario):
             usuario.eliminar_categoria(nombre_categoria)
         elif opcion == '3':
             nombre_categoria = input("Ingrese el nombre de la categoría a modificar: ")
-            # Aquí puedes incluir la lógica para modificar la categoría
-            # Por ejemplo, puedes solicitar el nuevo nombre, descripción y tipo
+            nombre_categorianuevo = input("Ingrese el nombre de la categoría a modificar: ")
+            descripcion = input("Ingrese nueva descripción para la categoría: ")
+            tipo = input("Ingrese  tipo de la categoría a modificar (Ingreso o Gasto): ")
+            usuario.modificar_categoria(nombre_categoria,nombre_categorianuevo, descripcion, tipo)
         elif opcion == '4':
             usuario.mostrar_categorias()
         elif opcion == '5':
@@ -180,46 +188,132 @@ def menu_categoria(usuario):
             print("Opción inválida. Intente nuevamente.")
 
 
-def menu_cuentaPRI(usuario):
+def menu_informes(lista_transacciones):
+    print("\n=== GENERAR INFORMES ===")
+    print("1. Informe de ingresos")
+    print("2. Informe de gastos")
+    print("3. Informe neto")
+    print("4. Volver al menú principal")
+    opcion = input("Seleccione una opción: ")
+
+    if opcion in ['1', '2', '3']:
+        fecha_inicio = input("Ingrese la fecha de inicio (YYYY-MM-DD): ")
+        fecha_fin = input("Ingrese la fecha de fin (YYYY-MM-DD): ")
+
+        # Crear instancia del informe
+        tipo_informe = ""
+        if opcion == '1':
+            tipo_informe = "ingreso"
+        elif opcion == '2':
+            tipo_informe = "gastos"
+        elif opcion == '3':
+            tipo_informe = "neto"
+
+        informe = Informe(tipo_informe)
+        resultado = informe.generar_informe(lista_transacciones, fecha_inicio, fecha_fin)
+        
+        # Imprimir el resultado del informe
+        print(resultado)
+    elif opcion == '4':
+        return  # Vuelve al menú principal
+    else:
+        print("Opción no válida.")
+
+def menu_cuentaPRI(usuario, lista_metas, lista_transacciones):
     while True:
         print("\n=== MENÚ DE CUENTAS ===")
         print("1. Ingresar gastos")
         print("2. Ingresar ingresos")
-        print("3. cuenta")  
-        print("4. Categorias")
-        print("5. Logout")
+        print("3. Cuenta")
+        print("4. Categorías")
+        print("5. Gestionar Metas")
+        print("6. Generar Informe")
+        print("7. Logout")
         print("========================")
 
         opcion_menu = input("Seleccione una opción: ")
 
         if opcion_menu == '1':
-            ingresar_gastos(usuario)
+            ingresar_gastos(usuario, lista_transacciones)
         elif opcion_menu == '2':
-            ingresar_ingresos(usuario)
+            ingresar_ingresos(usuario, lista_transacciones)
         elif opcion_menu == '3':
             menu_cuenta(usuario)
         elif opcion_menu == '4':
             menu_categoria(usuario)
         elif opcion_menu == '5':
+            menu_metas(usuario)
+        elif opcion_menu == '6':
+            menu_informes(usuario.lista_transacciones)  
+        elif opcion_menu == '7':
             print("Cerrando sesión...")
             break
         else:
             print("Opción invalida. Intente nuevamente.")
 
+def menu_metas(usuario):  # Asegúrate de que usuario sea el objeto Usuario
+    while True:
+        print("\n=== GESTIÓN DE METAS ===")
+        print("1. Registrar nueva meta")
+        print("2. Verificar cumplimiento de metas")
+        print("3. Volver al menú principal")
+        print("========================")
 
+        opcion = input("Seleccione una opción: ")
+
+        if opcion == '1':
+            id_meta = input("Ingrese el ID de la meta: ")
+            descripcion = input("Ingrese la descripción de la meta: ")
+            valor_objetivo = float(input("Ingrese el valor objetivo: "))
+
+            try:
+                fecha_limite = date.fromisoformat(input("Ingrese la fecha límite (YYYY-MM-DD): "))
+            except ValueError:
+                print("Fecha inválida. Intente nuevamente.")
+                continue
+
+            nueva_meta = MetaFinanciera(id_meta, valor_objetivo, fecha_limite, descripcion)
+            nueva_meta.registrar_meta(usuario.lista_metas)  # Esto debe funcionar ahora
+            print("Meta registrada exitosamente.")
+
+        elif opcion == '2':
+            if not usuario.lista_metas:
+                print("No hay metas registradas.")
+            else:
+                id_cuenta = input("Ingrese el ID de la cuenta para verificar las metas: ")
+                cuenta = None
+                for c in usuario.get_cuentas():
+                    if c.get_id_cuenta() == id_cuenta:  # Cambia aquí
+                        cuenta = c
+                        break
+
+                if cuenta is None:
+                    print("Cuenta no encontrada.")
+                else:
+                    for meta in usuario.lista_metas:
+                        print(f"\nMeta: {meta.get_descripcion()}")  # Cambia aquí
+                        meta.verificar_cumplimiento(cuenta)
+
+        elif opcion == '3':
+            break
+        else:
+            print("Opción inválida. Intente nuevamente.")
+
+            
 def main():
+    lista_metas = []  
+    lista_transacciones = [] 
+
     while True:
         mostrar_menu()
         opcion = input("Seleccione una opción: ")
 
         if opcion == '1':
             registrar_usuario()
-
         elif opcion == '2':
             usuario = iniciar_sesion()
             if usuario:
-                menu_cuentaPRI(usuario) 
-
+                menu_cuentaPRI(usuario, lista_metas, lista_transacciones)
         elif opcion == '3':
             print("Saliendo...")
             break
@@ -227,4 +321,4 @@ def main():
             print("Opción inválida. Intente nuevamente.")
 
 if __name__ == "__main__":
-    main()
+    main()  # Asegúrate de llamar a la función main aquí

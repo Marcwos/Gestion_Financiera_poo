@@ -11,7 +11,9 @@ class Usuario:
         self.__saldo_actual = saldo_actual 
         self.__historial_transacciones = historial_transacciones if historial_transacciones is not None else [] 
         self.__cuentas = [] 
-        self.lista_categorias = []  # Inicializa la lista de categorías
+        self.lista_categorias = []
+        self.lista_metas = []        
+        self.lista_transacciones = [] 
 
     def get_password(self):
         return self.__password
@@ -70,3 +72,11 @@ class Usuario:
             print("Categorías registradas:")
             for categoria in self.lista_categorias:
                 print(f"- {categoria.nombre_categoria} ({categoria.tipo})")
+    
+    def modificar_categoria(self, nombre_actual, nuevo_nombre, nueva_descripcion, nuevo_tipo):
+        """Modifica una categoría existente por su nombre."""
+        for categoria in self.lista_categorias:
+            if categoria.nombre_categoria == nombre_actual:
+                categoria.modificar_categoria(nuevo_nombre, nueva_descripcion, nuevo_tipo)
+                return
+        print(f"No se encontró la categoría '{nombre_actual}'.")
