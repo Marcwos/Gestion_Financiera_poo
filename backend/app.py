@@ -212,10 +212,10 @@ def menu_informes(lista_transacciones):
         informe = Informe(tipo_informe)
         resultado = informe.generar_informe(lista_transacciones, fecha_inicio, fecha_fin)
         
-        # Imprimir el resultado del informe
+       
         print(resultado)
     elif opcion == '4':
-        return  # Vuelve al menú principal
+        return  
     else:
         print("Opción no válida.")
 
@@ -251,7 +251,7 @@ def menu_cuentaPRI(usuario, lista_metas, lista_transacciones):
         else:
             print("Opción invalida. Intente nuevamente.")
 
-def menu_metas(usuario):  # Asegúrate de que usuario sea el objeto Usuario
+def menu_metas(usuario): 
     while True:
         print("\n=== GESTIÓN DE METAS ===")
         print("1. Registrar nueva meta")
@@ -273,7 +273,7 @@ def menu_metas(usuario):  # Asegúrate de que usuario sea el objeto Usuario
                 continue
 
             nueva_meta = MetaFinanciera(id_meta, valor_objetivo, fecha_limite, descripcion)
-            nueva_meta.registrar_meta(usuario.lista_metas)  # Esto debe funcionar ahora
+            nueva_meta.registrar_meta(usuario.lista_metas) 
             print("Meta registrada exitosamente.")
 
         elif opcion == '2':
@@ -283,7 +283,7 @@ def menu_metas(usuario):  # Asegúrate de que usuario sea el objeto Usuario
                 id_cuenta = input("Ingrese el ID de la cuenta para verificar las metas: ")
                 cuenta = None
                 for c in usuario.get_cuentas():
-                    if c.get_id_cuenta() == id_cuenta:  # Cambia aquí
+                    if c.get_id_cuenta() == id_cuenta:  
                         cuenta = c
                         break
 
@@ -291,7 +291,7 @@ def menu_metas(usuario):  # Asegúrate de que usuario sea el objeto Usuario
                     print("Cuenta no encontrada.")
                 else:
                     for meta in usuario.lista_metas:
-                        print(f"\nMeta: {meta.get_descripcion()}")  # Cambia aquí
+                        print(f"\nMeta: {meta.get_descripcion()}")  
                         meta.verificar_cumplimiento(cuenta)
 
         elif opcion == '3':
@@ -321,4 +321,4 @@ def main():
             print("Opción inválida. Intente nuevamente.")
 
 if __name__ == "__main__":
-    main()  # Asegúrate de llamar a la función main aquí
+    main()  
