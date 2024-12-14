@@ -1,9 +1,9 @@
 from abc import ABC, abstractmethod
 
-# Interfaz base
+# Clase base (interfaz común para categorías y subcategorías)
 class ElementoCategoria(ABC):
     @abstractmethod
-    def mostrar(self):
+    def mostrar(self, nivel=0):
         pass
 
     @abstractmethod
@@ -14,37 +14,48 @@ class ElementoCategoria(ABC):
     def eliminar(self, elemento):
         pass
 
-# Clase hoja
+
+# Clase hoja (categoría individual)
 class Categoria(ElementoCategoria):
-    def __init__(self, nombre, descripcion, tipo):
-        self.nombre = nombre
+    def __init__(self, nombre_categoria, descripcion, tipo):
+        self.nombre_categoria = nombre_categoria
         self.descripcion = descripcion
         self.tipo = tipo
 
-    def mostrar(self):
-        print(f"Categoría: {self.nombre} ({self.tipo}) - {self.descripcion}")
+    def mostrar(self, nivel=0):
+        indentacion = "  " * nivel
+        print(f"{indentacion}- {self.nombre_categoria} ({self.tipo}): {self.descripcion}")
 
+    # SRP
     def agregar(self, elemento):
-        print("No se pueden agregar subcategorías a una categoría individual.")
+        raise NotImplementedError("No se pueden agregar subcategorías a una categoría individual.")
 
+    # SRP
     def eliminar(self, elemento):
-        print("No se pueden eliminar subcategorías de una categoría individual.")
+        raise NotImplementedError("No se pueden eliminar subcategorías de una categoría individual.")
 
-# Clase compuesta
+
+# Clase compuesta (categoría que puede contener subcategorías)
 class CategoriaCompuesta(ElementoCategoria):
-    def __init__(self, nombre):
-        self.nombre = nombre
+    def __init__(self, nombre_categoria):
+        self.nombre_categoria = nombre_categoria
         self.subcategorias = []
 
-    def mostrar(self):
-        print(f"Categoría compuesta: {self.nombre}")
+    def mostrar(self, nivel=0):
+        indentacion = "  " * nivel
+        print(f"{indentacion}+ {self.nombre_categoria}")
         for subcategoria in self.subcategorias:
-            subcategoria.mostrar()
+            subcategoria.mostrar(nivel + 1)
 
-    def agregar(self, elemento):
+    # OCP
+    def agregar(self, elemento: ElementoCategoria):
         self.subcategorias.append(elemento)
-        print(f"Subcategoría '{elemento.nombre}' agregada a '{self.nombre}'.")
+        print(f"Subcategoría '{elemento.nombre_categoria}' agregada a '{self.nombre_categoria}'.")
 
-    def eliminar(self, elemento):
-        self.subcategorias.remove(elemento)
-        print(f"Subcategoría '{elemento.nombre}' eliminada de '{self.nombre}'.")
+    # OCP
+    def eliminar(self, elemento: ElementoCategoria):
+        if elemento in self.subcategorias:
+            self.subcategorias.remove(elemento)
+            print(f"Subcategoría '{elemento.nombre_categoria}' eliminada de '{self.nombre_categoria}'.")
+        else:
+            print(f"Subcategoría '{elemento.nombre_categoria}' no encontrada en '{self.

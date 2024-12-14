@@ -22,11 +22,13 @@ class Transaccion:
     def get_descripcion(self):
         return self.__descripcion
 
+    # SRP
     def registrar_transaccion(self, lista_transacciones):
         """Registra la transacción en una lista"""
         lista_transacciones.append(self)
         print(f"Transacción registrada: {self.__descripcion} - {self.__monto}")
-        
+
+    # SRP
     def consultar_transaccion(self, id_transaccion, lista_transacciones):
         """Busca y devuelve una transacción por ID"""
         if 0 <= id_transaccion < len(lista_transacciones):
@@ -35,6 +37,7 @@ class Transaccion:
             print("Transacción no encontrada.")
             return None
 
+    # SRP
     def modificar_transaccion(self, id_transaccion, nuevos_datos, lista_transacciones):
         """Modifica una transacción con nuevos datos"""
         if 0 <= id_transaccion < len(lista_transacciones):
@@ -53,8 +56,40 @@ class TransaccionIngreso(Transaccion):
         super().__init__(monto, categoria, fecha, descripcion)
         self.tipo_transaccion = "Ingreso"  # Definimos el tipo de transacción
 
+    # SRP
+    def set_monto(self, nuevo_monto):
+        self.__monto = nuevo_monto
+
+    # SRP
+    def set_categoria(self, nueva_categoria):
+        self.__categoria = nueva_categoria
+
+    # SRP
+    def set_fecha(self, nueva_fecha):
+        self.__fecha = nueva_fecha
+
+    # SRP
+    def set_descripcion(self, nueva_descripcion):
+        self.__descripcion = nueva_descripcion
+
 
 class TransaccionGasto(Transaccion):
     def __init__(self, monto, categoria, fecha, descripcion):
         super().__init__(monto, categoria, fecha, descripcion)
         self.tipo_transaccion = "Gasto"  # Definimos el tipo de transacción
+
+    # SRP
+    def set_monto(self, nuevo_monto):
+        self.__monto = nuevo_monto
+
+    # SRP
+    def set_categoria(self, nueva_categoria):
+        self.__categoria = nueva_categoria
+
+    # SRP
+    def set_fecha(self, nueva_fecha):
+        self.__fecha = nueva_fecha
+
+    # SRP
+    def set_descripcion(self, nueva_descripcion):
+        self.__descripcion = nueva_descripcion
