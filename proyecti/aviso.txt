@@ -1,0 +1,4 @@
+debido al tamaño del archivo al momento comprimir decidimos presentar el codigo mediante un link de github: 
+
+https://github.com/Marcwos/Gestion_Financiera_poo/tree/master
+
