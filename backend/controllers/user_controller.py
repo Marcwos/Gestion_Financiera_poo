@@ -1,5 +1,5 @@
 from controllers.account_controller import Cuenta 
-from controllers.category_controller import Categoria
+from controllers.category_controller import Categoria, CategoriaCompuesta
 
 class Usuario:
     usuarios_registrados = []
@@ -57,26 +57,59 @@ class Usuario:
             for cuenta in self.get_cuentas():  # Cambiado de self.cuentas a self.get_cuentas()
                 print(f"- {cuenta.get_nombre_cuenta()} (Tipo: {cuenta.get_tipo_cuenta()}, Saldo: {cuenta.get_saldo()})")
 
-    def agregar_categoria(self, nombre_categoria, descripcion, tipo):
-            nueva_categoria = Categoria(nombre_categoria, descripcion, tipo)
-            nueva_categoria.agregar_categoria(self.lista_categorias)
+    def agregar_categoria(self, nombre_categoria, descripcion, tipo, categoria_padre=None):
+        """Agrega una nueva categoría o subcategoría."""
+        nueva_categoria = Categoria(nombre_categoria, descripcion, tipo)
+
+        if categoria_padre is None:  # Si no se especifica una categoría padre, agregar al nivel raíz.
+            self.lista_categorias.append(nueva_categoria)
+            print(f"Categoría '{nombre_categoria}' agregada al nivel raíz.")
+        else:
+            for categoria in self.lista_categorias:
+                if isinstance(categoria, CategoriaCompuesta) and categoria.nombre_categoria == categoria_padre:
+                    categoria.agregar(nueva_categoria)
+                    print(f"Categoría '{nombre_categoria}' agregada como subcategoría de '{categoria_padre}'.")
+                    return
+            print(f"No se encontró la categoría compuesta '{categoria_padre}'.")
 
     def eliminar_categoria(self, nombre_categoria):
-            categoria = Categoria(nombre_categoria, "", "")
-            categoria.eliminar_categoria(self.lista_categorias)
+        """Elimina una categoría o subcategoría por su nombre."""
+        for categoria in self.lista_categorias:
+            if categoria.nombre_categoria == nombre_categoria:
+                self.lista_categorias.remove(categoria)
+                print(f"Categoría '{nombre_categoria}' eliminada del nivel raíz.")
+                return
+            elif isinstance(categoria, CategoriaCompuesta):
+                categoria.eliminar(Categoria(nombre_categoria, "", ""))
+                return
+        print(f"No se encontró la categoría '{nombre_categoria}' en el nivel raíz.")
 
     def mostrar_categorias(self):
+        """Muestra todas las categorías, incluyendo jerarquías."""
         if not self.lista_categorias:
             print("No hay categorías registradas.")
         else:
             print("Categorías registradas:")
             for categoria in self.lista_categorias:
-                print(f"- {categoria.nombre_categoria} ({categoria.tipo})")
-    
+                categoria.mostrar()
+
     def modificar_categoria(self, nombre_actual, nuevo_nombre, nueva_descripcion, nuevo_tipo):
         """Modifica una categoría existente por su nombre."""
         for categoria in self.lista_categorias:
             if categoria.nombre_categoria == nombre_actual:
                 categoria.modificar_categoria(nuevo_nombre, nueva_descripcion, nuevo_tipo)
                 return
+            elif isinstance(categoria, CategoriaCompuesta):
+                self._modificar_categoria_recursiva(categoria, nombre_actual, nuevo_nombre, nueva_descripcion, nuevo_tipo)
+                return
         print(f"No se encontró la categoría '{nombre_actual}'.")
+
+    def _modificar_categoria_recursiva(self, categoria_compuesta, nombre_actual, nuevo_nombre, nueva_descripcion, nuevo_tipo):
+        """Busca y modifica una categoría dentro de una estructura jerárquica."""
+        for subcategoria in categoria_compuesta.subcategorias:
+            if subcategoria.nombre_categoria == nombre_actual:
+                subcategoria.modificar_categoria(nuevo_nombre, nueva_descripcion, nuevo_tipo)
+                print(f"Categoría '{nombre_actual}' modificada exitosamente.")
+                return
+            elif isinstance(subcategoria, CategoriaCompuesta):
+                self._modificar_categoria_recursiva(subcategoria, nombre_actual, nuevo_nombre, nueva_descripcion, nuevo_tipo)

@@ -1,9 +1,13 @@
+from datetime import datetime
 
 class Transaccion:
     def __init__(self, monto, categoria, fecha, descripcion):
         self.__monto = monto
         self.__categoria = categoria
-        self.__fecha = fecha 
+        if isinstance(fecha, str):
+            self.__fecha = datetime.strptime(fecha, "%Y-%m-%d").date()  # Convierte de str a date
+        else:
+            self.__fecha = fecha
         self.__descripcion = descripcion
 
     def get_monto(self):

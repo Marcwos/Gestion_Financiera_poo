@@ -1,37 +1,61 @@
 from controllers.transaction_controller import TransaccionIngreso, TransaccionGasto  
+from utils.helpers import convertir_a_fecha
 
-class Informe:
-    def __init__(self, tipo_informe):  # Constructor correcto
-        if tipo_informe not in ["ingreso", "gastos", "neto"]:
-            raise ValueError(f"Tipo de informe '{tipo_informe}' no es válido.")
-        self.tipo_informe = tipo_informe
+class EstrategiaInforme:
+    def generar(self, transacciones, fecha_inicio, fecha_fin):
+        raise NotImplementedError
 
-    def generar_informe(self, transacciones, fecha_inicio, fecha_fin):
-        # Filtrar transacciones dentro del rango de fechas
-        transacciones_filtradas = [t for t in transacciones if fecha_inicio <= t.get_fecha() <= fecha_fin]
+
+class EstrategiaInformeIngresos(EstrategiaInforme):
+    def generar(self, transacciones, fecha_inicio, fecha_fin):
+        # Filtrar las transacciones de ingresos dentro del rango de fechas
+        transacciones_filtradas = [
+            t for t in transacciones
+            if fecha_inicio <= t.get_fecha() <= fecha_fin and isinstance(t, TransaccionIngreso)
+        ]
         
-        # Generar el informe según el tipo
-        if self.tipo_informe == "ingreso":
-            return self._generar_informe_ingresos(transacciones_filtradas)
-        elif self.tipo_informe == "gastos":
-            return self._generar_informe_gastos(transacciones_filtradas)
-        elif self.tipo_informe == "neto":
-            return self._generar_informe_neto(transacciones_filtradas)
+        # Ver qué transacciones fueron filtradas
+        print(f"Transacciones filtradas (ingresos): {[t.get_monto() for t in transacciones_filtradas]}")
 
-    def _generar_informe_ingresos(self, transacciones):
-        # Filtrar ingresos
-        ingresos = [t for t in transacciones if isinstance(t, TransaccionIngreso)]
-        total = sum(t.get_monto() for t in ingresos)
+        total = sum(t.get_monto() for t in transacciones_filtradas)
         return f"Total de ingresos: {total}"
 
-    def _generar_informe_gastos(self, transacciones):
-        # Filtrar gastos
-        gastos = [t for t in transacciones if isinstance(t, TransaccionGasto)]
-        total = sum(t.get_monto() for t in gastos)
+
+class EstrategiaInformeGastos(EstrategiaInforme):
+    def generar(self, transacciones, fecha_inicio, fecha_fin):
+        # Filtrar las transacciones de gastos dentro del rango de fechas
+        transacciones_filtradas = [
+            t for t in transacciones
+            if fecha_inicio <= t.get_fecha() <= fecha_fin and isinstance(t, TransaccionGasto)
+        ]
+        
+        # Ver qué transacciones fueron filtradas
+        print(f"Transacciones filtradas (gastos): {[t.get_monto() for t in transacciones_filtradas]}")
+
+        total = sum(t.get_monto() for t in transacciones_filtradas)
         return f"Total de gastos: {total}"
 
-    def _generar_informe_neto(self, transacciones):
-        ingresos = sum(t.get_monto() for t in transacciones if isinstance(t, TransaccionIngreso))
-        gastos = sum(t.get_monto() for t in transacciones if isinstance(t, TransaccionGasto))
+
+
+class EstrategiaInformeNeto(EstrategiaInforme):
+    def generar(self, transacciones, fecha_inicio, fecha_fin):
+        # Filtrar las transacciones dentro del rango de fechas
+        transacciones_filtradas = [
+            t for t in transacciones if fecha_inicio <= t.get_fecha() <= fecha_fin
+        ]
+
+        ingresos = sum(t.get_monto() for t in transacciones_filtradas if isinstance(t, TransaccionIngreso))
+        gastos = sum(t.get_monto() for t in transacciones_filtradas if isinstance(t, TransaccionGasto))
         neto = ingresos - gastos
+
         return f"Total neto: {neto}"
+
+
+
+# Clase principal Informe que utiliza el patrón Strategy
+class Informe:
+    def __init__(self, estrategia: EstrategiaInforme):
+        self.estrategia = estrategia
+
+    def generar_informe(self, transacciones, fecha_inicio, fecha_fin):
+        return self.estrategia.generar(transacciones, fecha_inicio, fecha_fin)

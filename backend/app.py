@@ -1,14 +1,10 @@
 from controllers.user_controller import Usuario 
-from controllers.transaction_controller import Transaccion
-from controllers.account_controller import Cuenta
-from controllers.transaction_controller import TransaccionIngreso, TransaccionGasto
-from controllers.category_controller import Categoria  
-from controllers.inform_controller import Informe
+from controllers.factory import TransaccionFactory
+from controllers.inform_controller import Informe,EstrategiaInformeGastos, EstrategiaInformeIngresos, EstrategiaInformeNeto
 from controllers.goals_finance_controller import MetaFinanciera
-from datetime import date
+from datetime import date, datetime
 
 lista_categorias = []
-lista_transacciones = []
 
 print("-----Bienvenido a la aplicación Money Wise-----")
 
@@ -84,17 +80,22 @@ def menu_cuenta(usuario):
         else:
             print("Opción inválida. Intente nuevamente.")
 
-def ingresar_gastos(usuario, lista_transacciones):
-    descripcion = input("Ingrese la descripción del gasto: ")
-    monto = float(input("Ingrese el monto del gasto: "))
+
+
+def ingresar_transaccion(usuario, lista_transacciones, tipo_transaccion):
+    """
+    Registra una transacción de tipo 'Ingreso' o 'Gasto' usando el Factory Method.
+    """
+    descripcion = input(f"Ingrese la descripción del {tipo_transaccion.lower()}: ")
+    monto = float(input(f"Ingrese el monto del {tipo_transaccion.lower()}: "))
     
     # Mostrar categorías y permitir selección
     categoria = mostrar_categorias(usuario)
     if categoria is None:
-        print("Categoría no válida. Gasto no registrado.")
+        print("Categoría no válida. Transacción no registrada.")
         return
     
-    fecha = input("Ingrese la fecha del gasto (YYYY-MM-DD): ")
+    fecha = input("Ingrese la fecha (YYYY-MM-DD): ")
     id_cuenta = input("Ingrese el ID de la cuenta: ")
 
     # Buscar la cuenta por ID
@@ -105,48 +106,25 @@ def ingresar_gastos(usuario, lista_transacciones):
             break
 
     if cuenta_encontrada:
-        # Crear transacción de gasto
-        transaccion = TransaccionGasto(monto, categoria.nombre_categoria, fecha, descripcion)
+        # Crear la transacción usando el Factory Method
+        transaccion = TransaccionFactory.crear_transaccion(tipo_transaccion, monto, categoria.nombre_categoria, fecha, descripcion)
+        
+        # Agregar la transacción a la cuenta
         cuenta_encontrada.agregar_transaccion(transaccion)
 
         # Agregar la transacción a la lista de transacciones del usuario
-        usuario.lista_transacciones.append(transaccion)
+        lista_transacciones.append(transaccion)
 
-        print("Gasto registrado exitosamente.")
+        print(f"{tipo_transaccion} registrado exitosamente.")
     else:
         print("La cuenta no existe.")
+
+# Funciones específicas
+def ingresar_gastos(usuario, lista_transacciones):
+    ingresar_transaccion(usuario, lista_transacciones, "Gasto")
 
 def ingresar_ingresos(usuario, lista_transacciones):
-    descripcion = input("Ingrese la descripción del ingreso: ")
-    monto = float(input("Ingrese el monto del ingreso: "))
-    
-    # Mostrar categorías y permitir selección
-    categoria = mostrar_categorias(usuario)
-    if categoria is None:
-        print("Categoría no válida. Ingreso no registrado.")
-        return
-    
-    fecha = input("Ingrese la fecha del ingreso (YYYY-MM-DD): ")
-    id_cuenta = input("Ingrese el ID de la cuenta: ")
-
-    # Buscar la cuenta por ID
-    cuenta_encontrada = None
-    for cuenta in usuario.get_cuentas():
-        if cuenta.get_id_cuenta() == id_cuenta:
-            cuenta_encontrada = cuenta
-            break
-
-    if cuenta_encontrada:
-        # Crear la transacción de ingreso
-        transaccion = TransaccionIngreso(monto, categoria.nombre_categoria, fecha, descripcion)
-        cuenta_encontrada.agregar_transaccion(transaccion)
-
-        # Agregar la transacción a la lista de transacciones del usuario
-        usuario.lista_transacciones.append(transaccion)
-
-        print("Ingreso registrado exitosamente.")
-    else:
-        print("La cuenta no existe.")
+    ingresar_transaccion(usuario, lista_transacciones, "Ingreso")
 
 def mostrar_categorias(usuario):
     print("Categorías disponibles:")
@@ -200,24 +178,30 @@ def menu_informes(lista_transacciones):
         fecha_inicio = input("Ingrese la fecha de inicio (YYYY-MM-DD): ")
         fecha_fin = input("Ingrese la fecha de fin (YYYY-MM-DD): ")
 
-        # Crear instancia del informe
-        tipo_informe = ""
-        if opcion == '1':
-            tipo_informe = "ingreso"
-        elif opcion == '2':
-            tipo_informe = "gastos"
-        elif opcion == '3':
-            tipo_informe = "neto"
+        # Convertir las fechas ingresadas a objetos 'date'
+        fecha_inicio = datetime.strptime(fecha_inicio, "%Y-%m-%d").date()
+        fecha_fin = datetime.strptime(fecha_fin, "%Y-%m-%d").date()
 
-        informe = Informe(tipo_informe)
+        estrategia = None
+        if opcion == '1':
+            estrategia = EstrategiaInformeIngresos()
+        elif opcion == '2':
+            estrategia = EstrategiaInformeGastos()
+        elif opcion == '3':
+            estrategia = EstrategiaInformeNeto()
+
+        # Crear el informe con la estrategia seleccionada
+        informe = Informe(estrategia)
+
+        # Generar el informe y mostrar el resultado
         resultado = informe.generar_informe(lista_transacciones, fecha_inicio, fecha_fin)
-        
-       
         print(resultado)
+
     elif opcion == '4':
-        return  
+        return
     else:
         print("Opción no válida.")
+
 
 def menu_cuentaPRI(usuario, lista_metas, lista_transacciones):
     while True:
@@ -244,12 +228,13 @@ def menu_cuentaPRI(usuario, lista_metas, lista_transacciones):
         elif opcion_menu == '5':
             menu_metas(usuario)
         elif opcion_menu == '6':
-            menu_informes(usuario.lista_transacciones)  
+            menu_informes(lista_transacciones)  
         elif opcion_menu == '7':
             print("Cerrando sesión...")
             break
         else:
             print("Opción invalida. Intente nuevamente.")
+
 
 def menu_metas(usuario): 
     while True:
